@@ -42,7 +42,7 @@ ${VBM} modifyvm Abitti-KOE --firmware efi
 ${VBM} modifyvm Abitti-KTP --firmware efi
 
 # Audio - you may need to change --audio to "oss" or "alsa" instead of "pulse"
-${VBM} modifyvm Abitti-KOE --audio pulse --audiocontroller ac97
+${VBM} modifyvm Abitti-KOE --audio pulse --audiocontroller hda
 
 # Take initial snapshots
 ${VBM} snapshot Abitti-KOE take "Before first boot"

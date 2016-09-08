@@ -41,7 +41,7 @@ rem Modify VM: Add storage, network, memory...
 %VBM% storageattach Abitti-KOE --storagectl "SATA" --device 0 --port 0 --type hdd --medium "%CD%\koe.vdi"
 %VBM% storageattach Abitti-KTP --storagectl "SATA" --device 0 --port 0 --type hdd --medium "%CD%\ktp.vdi"
 
-%VBM% modifyvm Abitti-KOE --audiocontroller ac97
+%VBM% modifyvm Abitti-KOE --audiocontroller hda
 
 rem Take initial snapshots
 %VBM% snapshot Abitti-KOE take "Before first boot"
