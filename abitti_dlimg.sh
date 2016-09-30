@@ -64,7 +64,7 @@ echo "Latest Abitti version: ${VERSION}"
 DEST=abitti_v${VERSION}
 
 if [ -d ${DEST} ]; then
-	report_warning "Directory ${DEST} already exists"
+	report_error "Directory ${DEST} already exists"
 fi
 
 mkdir ${DEST}
