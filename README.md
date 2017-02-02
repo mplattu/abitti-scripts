@@ -19,3 +19,18 @@ to do the same. The images are located in PROFILE/AppData/Local/YtlDigabi/.
  * `abitti_createvm.sh` Create Abitti VMs on Linux host.
  * `abitti_createvm.bat` Create Abitti VMs on Windows host.
 
+## Run server in VirtualBox for a local network
+
+`abitti_createvm` creates internal network which connects test taker's workstation and the server. Internal here means internal to the VirtualBox. However, it is technically possible to run server as a VirtualBox machine and connect it to your local network. Local here means the local Ethernet (or wireless) network. Before building the setup please make sure that your VirtualBox license allows you to do this.
+
+ 1) Install VirtualBox and Extension Pack as you need USB support.
+ 2) Create Abitti VMs using `abitti_createvm`. 
+ 3) Change the Abitti-KTP settings from the VirtualBox Settings:
+  * Settings
+  * Network
+  * Adapter 1 is not connected to an "Internal Network" called "abitti". Change this:
+  * Attached to: Bridged Adapter
+  * Name: Select your Ethernet interface
+ 
+Finally, make sure your host does not bind to the Ethernet interface. If your host asks network settings using DHCP the Abitti server reports is as "unknown device" in the terminal view.
+
