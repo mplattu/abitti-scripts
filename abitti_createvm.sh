@@ -1,3 +1,4 @@
+#!/bin/sh
 VBM=/usr/bin/VBoxManage
 
 # Shutdown existing VM:s
