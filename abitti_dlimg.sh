@@ -9,6 +9,11 @@
 # supported tools see www.abitti.fi.
 
 FLAVOUR=prod
+if type 'md5sum' > /dev/null 2>&1; then
+        MD5="md5sum --check --status"
+else
+        MD5="md5 -r"
+fi
 
 report_error() {
 	echo -------Error---------------------------------
@@ -37,7 +42,7 @@ download_and_check() {
 		report_error "Failed to download image '${TAG}': $?"
 	fi
 	
-	cat ${TAG}.zip.md5 | md5sum --check --status
+	cat ${TAG}.zip.md5 | $MD5
 	if [ $? -ne 0 ]; then
 		report_error "Failed to verify image '${TAG}': $?"
 	fi
