@@ -66,7 +66,7 @@ fi
 
 echo "Latest Abitti version: ${VERSION}"
 
-DEST=abitti_v${VERSION}
+DEST=abitti.v${VERSION}
 
 if [ -d ${DEST} ]; then
 	report_error "Directory ${DEST} already exists"
