@@ -18,8 +18,9 @@ fi
 ${VBM} convertfromraw ktp.dd ktp.vdi --format vdi
 ${VBM} convertfromraw koe.dd koe.vdi --format vdi
 
-# Add more storage to KTP image
+# Add more storage to KOE/KTP image
 ${VBM} modifyhd ktp.vdi --resize 8192
+${VBM} modifyhd koe.vdi --resize 8192
 
 # Create VM
 ${VBM} createvm --name Abitti-KOE --register --ostype Linux_64
