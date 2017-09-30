@@ -34,3 +34,4 @@ to do the same. The images are located in `PROFILE/AppData/Local/YtlDigabi/`.
  
 Finally, make sure your host does not bind to the Ethernet interface. If your host asks network settings using DHCP the Abitti server reports is as "unknown device" in the terminal view.
 
+`abitti_export_vbktp.sh` creates a OVF2.0 export from the current `ktp.dd`.
