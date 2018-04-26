@@ -1,5 +1,26 @@
-#!/bin/sh
-VBM=/usr/bin/VBoxManage
+#!/usr/bin/env bash
+
+if [ "$(uname)" == "Darwin" ]; then
+    # Running on Mac OSX
+    VBM=/Applications/VirtualBox.app/Contents/Resources/VirtualBoxVM.app/Contents/MacOS/VBoxManage
+    if [ ! -f $VBM ]; then
+        echo "You seem to be running Mac OSX operating system."
+        echo "VirtualBox's VBoxManage command line tool was not found at:"
+        echo $VBM
+        echo "Exiting"
+        exit
+    fi
+else
+    # Running on Linux
+    VBM=/usr/bin/VBoxManage
+    if [ ! -f $VBM ]; then
+        echo "You seem to be running Linux operating system."
+        echo "VirtualBox's VBoxManage command line tool was not found at:"
+        echo $VBM
+        echo "Exiting"
+        exit
+    fi
+fi
 
 echo "Shutdown existing VM:s"
 ${VBM} controlvm Abitti-KOE poweroff 
