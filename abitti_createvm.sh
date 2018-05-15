@@ -22,6 +22,12 @@ else
     fi
 fi
 
+if [ ! -d ~/ktp-jako ]; then
+    echo "You need to create shared folder ~/ktp-jako to emulate transfer USB stick."
+    echo "Exiting"
+    exit
+fi
+
 echo "Shutdown existing VM:s"
 ${VBM} controlvm Abitti-KOE poweroff 
 ${VBM} controlvm Abitti-KTP poweroff 
@@ -66,6 +72,9 @@ ${VBM} modifyvm Abitti-KTP --firmware efi
 
 echo  'Audio - you may need to change --audio to "oss" or "alsa" instead of "pulse"'
 ${VBM} modifyvm Abitti-KOE --audio pulse --audiocontroller hda
+
+echo "Shared folder"
+${VBM} sharedfolder add Abitti-KTP --name media_usb1 --hostpath ~/ktp-jako
 
 echo "Take initial snapshots"
 ${VBM} snapshot Abitti-KOE take "Before first boot"

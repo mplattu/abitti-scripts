@@ -1,5 +1,6 @@
 @ECHO OFF
 SET VBM="c:\program files\oracle\virtualbox\vboxmanage.exe"
+SET SHAREDPATH="%HOMEDRIVE%%HOMEPATH%\ktp-jako"
 
 rem Make sure we have the dd images (use AbittiUSB to download these)
 IF NOT EXIST %LOCALAPPDATA%\YtlDigabi\koe.dd GOTO no_image_prof
@@ -10,7 +11,7 @@ SET KTP_PATH="%LOCALAPPDATA%\YtlDigabi\ktp.dd"
 ECHO Using images from the profile:
 ECHO KOE image path: %KOE_PATH%
 ECHO KTP image path: %KTP_PATH%
-GOTO create_vms
+GOTO check_shared_folder
 
 :no_image_prof
 ECHO Images missing (%LOCALAPPDATA%\YtlDigabi\*.dd)
@@ -21,13 +22,20 @@ SET KTP_PATH=".\ktp.dd"
 ECHO Using images from the current directory:
 ECHO KOE image path: %KOE_PATH%
 ECHO KTP image path: %KTP_PATH%
-GOTO create_vms
+GOTO check_shared_folder
 
 :no_image_here
 ECHO Images missing (.\*.dd)
 ECHO Use either standard AbittiUSB or your browser to download the images.
 GOTO end
- 
+
+:check_shared_folder
+IF EXIST "%SHAREDPATH%" GOTO create_vms
+ECHO You need to create shared folder
+ECHO %SHAREDPATH%
+ECHO to emulate transfer USB stick.
+GOTO end
+
 :create_vms
 rem Shutdown existing VM:s
 %VBM% controlvm Abitti-KOE poweroff 
@@ -82,8 +90,8 @@ rem Create VM
 %VBM% createvm --name Abitti-KTP --register --ostype Linux_64
 
 rem Modify VM: Add storage, network, memory...
-%VBM% modifyvm Abitti-KOE --memory 2048 --nic1 intnet --intnet1 abitti --usb on --usbehci on --usbxhci on --firmware efi --cpus 2
-%VBM% modifyvm Abitti-KTP --memory 4096 --nic1 intnet --intnet1 abitti --usb on --usbehci on --usbxhci on --firmware efi
+%VBM% modifyvm Abitti-KOE --memory 2048 --nic1 intnet --intnet1 abitti --firmware efi --cpus 2
+%VBM% modifyvm Abitti-KTP --memory 4096 --nic1 intnet --intnet1 abitti --firmware efi --cpus 2
 
 %VBM% storagectl Abitti-KOE --name SATA --add sata --controller IntelAHCI --portcount 1
 %VBM% storagectl Abitti-KTP --name SATA --add sata --controller IntelAHCI --portcount 1
@@ -93,6 +101,9 @@ rem Modify VM: Add storage, network, memory...
 
 REM If you have problems with audio try different audio controllers: "ac97", "hda", "sb16"
 %VBM% modifyvm Abitti-KOE --audiocontroller ac97
+
+rem Shared folder
+%VBM% sharedfolder add Abitti-KTP --name media_usb1 --hostpath %SHAREDPATH%
 
 rem Take initial snapshots
 %VBM% snapshot Abitti-KOE take "Before first boot"
