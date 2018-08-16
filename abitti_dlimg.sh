@@ -45,7 +45,7 @@ download_and_check() {
 	if [ "$(uname)" == "Darwin" ]; then
 		curl -O http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip # Mac OSX
 	else
-		wget -c http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip.md5 # Linux
+		wget -c http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip # Linux
 	fi
 	if [ $? -ne 0 ]; then
 		report_error "Failed to download image '${TAG}': $?"
