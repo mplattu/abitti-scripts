@@ -90,7 +90,7 @@ rem Create VM
 %VBM% createvm --name Abitti-KTP --register --ostype Linux_64
 
 rem Modify VM: Add storage, network, memory...
-%VBM% modifyvm Abitti-KOE --memory 2048 --nic1 intnet --intnet1 abitti --firmware efi --cpus 2
+%VBM% modifyvm Abitti-KOE --memory 4096 --nic1 intnet --intnet1 abitti --firmware efi --cpus 2
 %VBM% modifyvm Abitti-KTP --memory 4096 --nic1 intnet --intnet1 abitti --firmware efi --cpus 2
 
 %VBM% storagectl Abitti-KOE --name SATA --add sata --controller IntelAHCI --portcount 1

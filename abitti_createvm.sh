@@ -55,7 +55,7 @@ ${VBM} createvm --name Abitti-KOE --register --ostype Linux_64
 ${VBM} createvm --name Abitti-KTP --register --ostype Linux_64
 
 echo "Modify VM: Add storage, network, memory..."
-${VBM} modifyvm Abitti-KOE --memory 2048 --nic1 intnet --intnet1 abitti --usb off --firmware efi --cpus 2
+${VBM} modifyvm Abitti-KOE --memory 4096 --nic1 intnet --intnet1 abitti --usb off --firmware efi --cpus 2
 ${VBM} modifyvm Abitti-KTP --memory 4096 --nic1 intnet --intnet1 abitti --usb off --firmware efi
 
 ${VBM} storagectl Abitti-KOE --name SATA --add sata --controller IntelAHCI --portcount 1
