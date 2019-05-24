@@ -22,7 +22,9 @@ to do the same. The images are located in `PROFILE/AppData/Local/YtlDigabi/`.
 ## Create Abitti Server Using a Given Disk Image
 
 `abitti_createsrv.sh` Create Abitti Server using given disk image. You might want to use this
-script to create a server around a backup .vmdk file created with Naksu.
+script to create a server around a backup .vmdk file created with Naksu. If you execute this
+after `abitti_createvm` your server drops to internal VirtualBox `abitti` network with one student
+VM.
 
 ## Run Abitti server in VirtualBox for a local exam network
 
@@ -40,3 +42,10 @@ script to create a server around a backup .vmdk file created with Naksu.
 Finally, make sure your host does not bind to the Ethernet interface. If your host asks network settings using DHCP the Abitti server reports is as "unknown device" in the terminal view.
 
 `abitti_export_vbktp.sh` creates a OVF2.0 export from the current `ktp.dd`.
+
+## Revert Abitti USB stick "back to normal"
+
+`mkfat.sh` overwrites existing partition table, creates a FAT32 partition
+and creates a FAT32 filesystem to this partiton. It tries to check whether
+the device contains mounted filesystem. Use with caution!
+
