@@ -47,7 +47,7 @@ ${VBM} convertfromraw ktp.dd ktp.vdi --format vdi
 ${VBM} convertfromraw koe.dd koe.vdi --format vdi
 
 echo "Add more storage to KTP/KOE image"
-${VBM} modifyhd ktp.vdi --resize 8192
+${VBM} modifyhd ktp.vdi --resize 16384
 ${VBM} modifyhd koe.vdi --resize 8192
 
 echo "Create VM"
