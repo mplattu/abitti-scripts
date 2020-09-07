@@ -73,6 +73,9 @@ ${VBM} modifyvm Abitti-KTP --firmware efi
 echo  'Audio - you may need to change --audio to "oss" or "alsa" instead of "pulse"'
 ${VBM} modifyvm Abitti-KOE --audio pulse --audiocontroller hda
 
+echo "Shared clipboard"
+${VBM} modifyvm Abitti-KTP --clipboard-mode bidirectional
+
 echo "Shared folder"
 ${VBM} sharedfolder add Abitti-KTP --name media_usb1 --hostpath ~/ktp-jako
 

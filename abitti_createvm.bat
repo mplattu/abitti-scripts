@@ -102,6 +102,9 @@ rem Modify VM: Add storage, network, memory...
 REM If you have problems with audio try different audio controllers: "ac97", "hda", "sb16"
 %VBM% modifyvm Abitti-KOE --audiocontroller ac97
 
+REM Shared clipboard
+%VBM% modifyvm Abitti-KTP --clipboard-mode bidirectional
+
 rem Shared folder
 %VBM% sharedfolder add Abitti-KTP --name media_usb1 --hostpath %SHAREDPATH%
 
