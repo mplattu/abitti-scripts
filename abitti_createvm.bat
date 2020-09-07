@@ -2,116 +2,88 @@
 SET VBM="c:\program files\oracle\virtualbox\vboxmanage.exe"
 SET SHAREDPATH="%HOMEDRIVE%%HOMEPATH%\ktp-jako"
 
-rem Make sure we have the dd images (use AbittiUSB to download these)
-IF NOT EXIST %LOCALAPPDATA%\YtlDigabi\koe.dd GOTO no_image_prof
-IF NOT EXIST %LOCALAPPDATA%\YtlDigabi\ktp.dd GOTO no_image_prof
-ECHO Images were found at %LOCALAPPDATA%\YtlDigabi\
-SET KOE_PATH="%LOCALAPPDATA%\YtlDigabi\koe.dd"
-SET KTP_PATH="%LOCALAPPDATA%\YtlDigabi\ktp.dd"
-ECHO Using images from the profile:
-ECHO KOE image path: %KOE_PATH%
-ECHO KTP image path: %KTP_PATH%
-GOTO check_shared_folder
+CALL :check_shared_folder
+IF NOT %ERRORLEVEL%==0 GOTO end
 
-:no_image_prof
-ECHO Images missing (%LOCALAPPDATA%\YtlDigabi\*.dd)
-IF NOT EXIST .\koe.dd GOTO no_image_here
-IF NOT EXIST .\ktp.dd GOTO no_image_here
-SET KOE_PATH=".\koe.dd"
-SET KTP_PATH=".\ktp.dd"
-ECHO Using images from the current directory:
-ECHO KOE image path: %KOE_PATH%
-ECHO KTP image path: %KTP_PATH%
-GOTO check_shared_folder
+CALL :create_vm Abitti-KOE
+IF NOT %ERRORLEVEL%==0 GOTO end
+CALL :create_vm Abitti-KTP1, %SHAREDPATH%
+IF NOT %ERRORLEVEL%==0 GOTO end
+CALL :create_vm Abitti-KTP2, %SHAREDPATH%
+IF NOT %ERRORLEVEL%==0 GOTO end
 
-:no_image_here
-ECHO Images missing (.\*.dd)
-ECHO Use either standard AbittiUSB or your browser to download the images.
+ECHO All done!
 GOTO end
 
+
 :check_shared_folder
-IF EXIST "%SHAREDPATH%" GOTO create_vms
+IF EXIST "%SHAREDPATH%" EXIT /B 0
 ECHO You need to create shared folder
 ECHO %SHAREDPATH%
 ECHO to emulate transfer USB stick.
-GOTO end
+EXIT /B 1
 
-:create_vms
-rem Shutdown existing VM:s
-%VBM% controlvm Abitti-KOE poweroff 
-%VBM% controlvm Abitti-KTP poweroff 
 
-rem Delete existing VM:s and related files
-%VBM% unregistervm Abitti-KOE --delete
-%VBM% unregistervm Abitti-KTP --delete
+:create_vm
+SET vmname=%~1
+SET sharedpath=%~2
+
+ECHO Creating VM %vmname%
+ECHO Shared path: %sharedpath%
+pause
+
+IF %vmname%==Abitti-KOE (SET disk_size=8192) ELSE (SET disk_size=16384)
+IF %vmname%==Abitti-KOE (SET memory_size=3500) ELSE (SET memory_size=8196)
+IF %vmname%==Abitti-KOE (SET rawimage=koe.dd) ELSE (SET rawimage=ktp.dd)
+
+IF NOT EXIST %rawimage% GOTO error_no_rawimage
+
+ECHO Shutdown %vmname%
+%VBM% controlvm %vmname% poweroff
+
+ECHO Delete %vmname% and related files
+%VBM% unregistervm %vmname% --delete
 
 rem Make sure there are no settings directory
-IF NOT EXIST "%USERPROFILE%\VirtualBox VMs" GOTO vbox_directory_missing
-IF EXIST "%USERPROFILE%\VirtualBox VMs\Abitti-KOE" GOTO vbox_vm_dir_exists
-IF EXIST "%USERPROFILE%\VirtualBox VMs\Abitti-KTP" GOTO vbox_vm_dir_exists
-GOTO check_vdifiles
+IF EXIST "%USERPROFILE%\VirtualBox VMs\%vmname%" GOTO error_vbox_vm_dir_exists
 
-:vbox_vm_dir_exists
-ECHO You have at least one of these two directories:
-ECHO 1) %USERPROFILE%\VirtualBox VMs\Abitti-KOE
-ECHO 2) %USERPROFILE%\VirtualBox VMs\Abitti-KTP
-ECHO Please delete these directories and re-run this script.
-GOTO end
+ECHO Convert disk image for %vmname%
+%VBM% convertfromraw %rawimage% %vmname%.vdi --format vdi
 
-:vbox_directory_missing
-ECHO Directory %USERPROFILE%\Virtualbox VMs is missing.
-ECHO Execute VirtualBox at least once to create it.
-GOTO end
- 
-:check_vdifiles
-rem Delete existing disk images
-IF NOT EXIST *.vdi GOTO convert_disks
+ECHO Add more storage space for %vmname%.vdi
+%VBM% modifyhd "%CD%\%vmname%.vdi" --resize %disk_size%
 
-SET /P ANSWER=VDI files exist. Delete vdi files? (Y/N)? 
-IF /i {%ANSWER%}=={y} (GOTO Remove_Disks)
-GOTO convert_disks
+ECHO Create VM %vmname%
+%VBM% createvm --name %vmname% --register --ostype Linux_64
 
-:Remove_Disks
-del *.vdi
+ECHO Modify VM %vmname%
+%VBM% modifyvm %vmname% --memory %memory_size% --nic1 intnet --intnet1 abitti --usb off --firmware efi --cpus 2 --vram 16
 
-:convert_disks
-rem Convert disk images
-%VBM% convertfromraw %KTP_PATH% ktp.vdi --format vdi
-%VBM% convertfromraw %KOE_PATH% koe.vdi --format vdi
-rem %VBM% convertfromraw ktp_padded.dd ktp.vdi --format vdi
-rem %VBM% convertfromraw koe_padded.dd koe.vdi --format vdi
+ECHO Attach storage controller to %vmname%
+%VBM% storagectl %vmname% --name SATA --add sata --controller IntelAHCI --portcount 1
 
-rem Add more size to KOE/KTP image
-%VBM% modifyhd "%CD%\ktp.vdi" --resize 8192
-%VBM% modifyhd "%CD%\koe.vdi" --resize 8192
+ECHO Attach disk image to storage controller
+%VBM% storageattach %vmname% --storagectl "SATA" --device 0 --port 0 --type hdd --medium "%CD%\%vmname%.vdi"
 
-rem Create VM
-%VBM% createvm --name Abitti-KOE --register --ostype Linux_64
-%VBM% createvm --name Abitti-KTP --register --ostype Linux_64
+ECHO Configuring audio, clipboard and shared folder
+IF %vmname%==Abitti-KOE %VBM% modifyvm %vmname% --audiocontroller hda --audioin off --audioout on
+IF NOT %vmname%==Abitti-KOE %VBM% modifyvm %vmname% --clipboard-mode bidirectional
+IF NOT %vmname%==Abitti-KOE %VBM% sharedfolder add %vmname% --name media_usb1 --hostpath=%sharedpath%
 
-rem Modify VM: Add storage, network, memory...
-%VBM% modifyvm Abitti-KOE --memory 4096 --nic1 intnet --intnet1 abitti --firmware efi --cpus 2
-%VBM% modifyvm Abitti-KTP --memory 4096 --nic1 intnet --intnet1 abitti --firmware efi --cpus 2
+ECHO Taking snapshot
+%VBM% snapshot %vmname% take "Before first boot"
 
-%VBM% storagectl Abitti-KOE --name SATA --add sata --controller IntelAHCI --portcount 1
-%VBM% storagectl Abitti-KTP --name SATA --add sata --controller IntelAHCI --portcount 1
+EXIT /B 0
 
-%VBM% storageattach Abitti-KOE --storagectl "SATA" --device 0 --port 0 --type hdd --medium "%CD%\koe.vdi"
-%VBM% storageattach Abitti-KTP --storagectl "SATA" --device 0 --port 0 --type hdd --medium "%CD%\ktp.vdi"
+:error_vbox_vm_dir_exists
+ECHO Please delete
+ECHO %USERPROFILE%\VirtualBox VMs\%vmname%
+ECHO and re-run this script.
+EXIT /B 1
 
-REM If you have problems with audio try different audio controllers: "ac97", "hda", "sb16"
-%VBM% modifyvm Abitti-KOE --audiocontroller ac97
+:error_no_rawimage
+ECHO Raw image %rawimage% is missing.
+EXIT /B 1
 
-REM Shared clipboard
-%VBM% modifyvm Abitti-KTP --clipboard-mode bidirectional
-
-rem Shared folder
-%VBM% sharedfolder add Abitti-KTP --name media_usb1 --hostpath %SHAREDPATH%
-
-rem Take initial snapshots
-%VBM% snapshot Abitti-KOE take "Before first boot"
-%VBM% snapshot Abitti-KTP take "Before first boot"
-
-echo All Done!
 :end
-pause
+PAUSE

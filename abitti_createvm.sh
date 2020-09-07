@@ -18,67 +18,82 @@ else
         echo "VirtualBox's VBoxManage command line tool was not found at:"
         echo $VBM
         echo "Exiting"
-        exit
+        exit 1
     fi
 fi
 
 if [ ! -d ~/ktp-jako ]; then
     echo "You need to create shared folder ~/ktp-jako to emulate transfer USB stick."
     echo "Exiting"
-    exit
+    exit 1
 fi
 
-echo "Shutdown existing VM:s"
-${VBM} controlvm Abitti-KOE poweroff 
-${VBM} controlvm Abitti-KTP poweroff 
-
-echo "Delete existing VM:s and related files"
-${VBM} unregistervm Abitti-KOE --delete
-${VBM} unregistervm Abitti-KTP --delete
-
-echo "Delete existing disk images"
 if [ -f *.vdi ]; then
     echo "*.vdi files exist. Delete them and re-run."
     exit 1
 fi
 
-echo "Convert disk images"
-${VBM} convertfromraw ktp.dd ktp.vdi --format vdi
-${VBM} convertfromraw koe.dd koe.vdi --format vdi
 
-echo "Add more storage to KTP/KOE image"
-${VBM} modifyhd ktp.vdi --resize 16384
-${VBM} modifyhd koe.vdi --resize 8192
+function create_vm() {
+	vmname=$1
 
-echo "Create VM"
-${VBM} createvm --name Abitti-KOE --register --ostype Linux_64
-${VBM} createvm --name Abitti-KTP --register --ostype Linux_64
+	echo "Creating VM $vmname"
 
-echo "Modify VM: Add storage, network, memory..."
-${VBM} modifyvm Abitti-KOE --memory 4096 --nic1 intnet --intnet1 abitti --usb off --firmware efi --cpus 2
-${VBM} modifyvm Abitti-KTP --memory 4096 --nic1 intnet --intnet1 abitti --usb off --firmware efi
+	disk_size=16384
+	memory_size=8196
+	rawimage=ktp.dd
 
-${VBM} storagectl Abitti-KOE --name SATA --add sata --controller IntelAHCI --portcount 1
-${VBM} storagectl Abitti-KTP --name SATA --add sata --controller IntelAHCI --portcount 1
+	if [ "$vmname" = "Abitti-KOE" ]; then
+		# Default settings for student's VM
+		disk_size=8192
+		memory_size=3500
+		rawimage=koe.dd
+	fi
 
-${VBM} storageattach Abitti-KOE --storagectl "SATA" --device 0 --port 0 --type hdd --medium "`pwd`/koe.vdi"
-${VBM} storageattach Abitti-KTP --storagectl "SATA" --device 0 --port 0 --type hdd --medium "`pwd`/ktp.vdi"
+	if [ ! -f $rawimage ]; then
+		echo "Could not find raw disk image: $rawimage"
+		exit 1
+	fi
 
-${VBM} modifyvm Abitti-KOE --vram 16
-${VBM} modifyvm Abitti-KTP --vram 16
+	echo "Shutdown $vmname"
+	${VBM} controlvm $vmname poweroff
 
-${VBM} modifyvm Abitti-KOE --firmware efi
-${VBM} modifyvm Abitti-KTP --firmware efi
+	echo "Delete $vmname and related files"
+	${VBM} unregistervm $vmname --delete
 
-echo  'Audio - you may need to change --audio to "oss" or "alsa" instead of "pulse"'
-${VBM} modifyvm Abitti-KOE --audio pulse --audiocontroller hda
+	echo "Convert disk image for $vmname"
+	${VBM} convertfromraw $rawimage $vmname.vdi --format vdi
 
-echo "Shared clipboard"
-${VBM} modifyvm Abitti-KTP --clipboard-mode bidirectional
+	echo "Add more storage space for $vmname.vdi"
+	${VBM} modifyhd $vmname.vdi --resize $disk_size
 
-echo "Shared folder"
-${VBM} sharedfolder add Abitti-KTP --name media_usb1 --hostpath ~/ktp-jako
+	echo "Create VM $vmname"
+	${VBM} createvm --name $vmname --register --ostype Linux_64
 
-echo "Take initial snapshots"
-${VBM} snapshot Abitti-KOE take "Before first boot"
-${VBM} snapshot Abitti-KTP take "Before first boot"
+	echo "Modify VM $vmname"
+	${VBM} modifyvm $vmname --memory $memory_size --nic1 intnet --intnet1 abitti --usb off --firmware efi --cpus 2 --vram 16
+
+	echo "Attach storage controller to $vmname"
+	${VBM} storagectl $vmname --name SATA --add sata --controller IntelAHCI --portcount 1
+
+	echo "Attach disk image to storage controller"
+	${VBM} storageattach $vmname --storagectl "SATA" --device 0 --port 0 --type hdd --medium "`pwd`/$vmname.vdi"
+
+	if [ "$vmname" = "Abitti-KOE" ]; then
+		echo 'Audio - you may need to change --audio to "oss" or "alsa" instead of "pulse"'
+		${VBM} modifyvm $vmname --audio pulse --audiocontroller hda --audioin off --audioout on
+	else
+		echo "Shared clipboard"
+		${VBM} modifyvm $vmname --clipboard-mode bidirectional
+
+		echo "Shared folder"
+		${VBM} sharedfolder add $vmname --name media_usb1 --hostpath ~/ktp-jako
+	fi
+
+	echo "Take snapshot"
+	${VBM} snapshot $vmname take "Before first boot"
+}
+
+create_vm Abitti-KOE
+create_vm Abitti-KTP1
+create_VM Abitti-KTP2
