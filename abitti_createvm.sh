@@ -96,4 +96,4 @@ function create_vm() {
 
 create_vm Abitti-KOE
 create_vm Abitti-KTP1
-create_VM Abitti-KTP2
+create_vm Abitti-KTP2
