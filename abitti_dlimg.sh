@@ -8,13 +8,8 @@
 # Finland. The download URLs may change without any notice. For
 # supported tools see www.abitti.fi.
 
-
 FLAVOUR=prod
-if type 'md5sum' > /dev/null 2>&1; then
-        MD5="md5sum --check --status"
-else
-        MD5="md5 -r"
-fi
+MYTEMP=/tmp/abitti_dlimg
 
 report_error() {
 	echo -------Error---------------------------------
@@ -32,38 +27,41 @@ report_warning() {
 
 download_and_check() {
 	TAG=$1
-	
-	if [ "$(uname)" == "Darwin" ]; then
-		curl -O http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip.md5 # Mac OSX
-	else
-		wget -c http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip.md5 # Linux
-	fi
-	if [ $? -ne 0 ]; then
-		report_error "Failed to download image '${TAG}' MD5: $?"
+	TEMPFILE=${MYTEMP}/${TAG}-etcher.zip
+
+	if [ ! -d ${MYTEMP} ]; then
+		mkdir -p ${MYTEMP}
 	fi
 	
 	if [ "$(uname)" == "Darwin" ]; then
-		curl -O http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip # Mac OSX
+		curl -o ${TEMPFILE} http://static.abitti.fi/etcher-usb/${TAG}-etcher.zip # Mac OSX
 	else
-		wget -c http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip # Linux
+		wget -O ${TEMPFILE} -c http://static.abitti.fi/etcher-usb/${TAG}-etcher.zip # Linux
 	fi
 	if [ $? -ne 0 ]; then
 		report_error "Failed to download image '${TAG}': $?"
 	fi
 	
-	cat ${TAG}.zip.md5 | $MD5
+	# Test zip for errors
+	unzip -t ${TEMPFILE}
 	if [ $? -ne 0 ]; then
-		report_error "Failed to verify image '${TAG}': $?"
+		report_error "ZIP ${TEMPFILE} is corrupted: $?"
 	fi
 	
-	unzip ${TAG}.zip
+	if [ -d ${MYTEMP}/zip ]; then
+		rm -fR ${MYTEMP}/zip/
+	fi
+	
+	unzip ${TEMPFILE} -d ${MYTEMP}/zip/
 	if [ $? -ne 0 ]; then
 		report_error "Failed to unzip image '${TAG}': $?"
 	fi
 	
+	
+	mv ${MYTEMP}/zip/ytl/${TAG}.img ${DEST}/${TAG}.dd
+	
 	# Remove temporary files
-	rm ${TAG}.zip
-	rm ${TAG}.zip.md5
+	rm -fR ${MYTEMP}
 }
 
 
@@ -86,7 +84,6 @@ if [ -d ${DEST} ]; then
 fi
 
 mkdir ${DEST}
-cd ${DEST}
 
 download_and_check ktp
 download_and_check koe
