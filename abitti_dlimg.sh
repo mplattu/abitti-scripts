@@ -20,57 +20,6 @@ else
 	DLCMD_STDOUT="wget --quiet -O -"
 fi
 
-
-report_error() {
-	echo -------Error---------------------------------
-	echo $1 >&2
-	echo ---------------------------------------------
-	exit 1
-}
-
-report_warning() {
-    MESSAGE=$1
-    echo -------Warning-------------------------------
-    echo $1
-    echo ---------------------------------------------
-}
-
-download_and_unzip() {
-	
-	
-	if [ "$(uname)" == "Darwin" ]; then
-		curl -O http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip.md5 # Mac OSX
-	else
-		wget -c http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip.md5 # Linux
-	fi
-	if [ $? -ne 0 ]; then
-		report_error "Failed to download image '${TAG}' MD5: $?"
-	fi
-	
-	if [ "$(uname)" == "Darwin" ]; then
-		curl -O http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip # Mac OSX
-	else
-		wget -c http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip # Linux
-	fi
-	if [ $? -ne 0 ]; then
-		report_error "Failed to download image '${TAG}': $?"
-	fi
-	
-	cat ${TAG}.zip.md5 | $MD5
-	if [ $? -ne 0 ]; then
-		report_error "Failed to verify image '${TAG}': $?"
-	fi
-	
-	unzip ${TAG}.zip
-	if [ $? -ne 0 ]; then
-		report_error "Failed to unzip image '${TAG}': $?"
-	fi
-	
-	# Remove temporary files
-	rm ${TAG}.zip
-	rm ${TAG}.zip.md5
-}
-
 download_and_extract() {
 	ZIP_URL=$1
 	ZIP_PATH=$2
