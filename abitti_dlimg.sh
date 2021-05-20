@@ -8,13 +8,18 @@
 # Finland. The download URLs may change without any notice. For
 # supported tools see www.abitti.fi.
 
+IMAGEPATH=~/abitti_images
 
-FLAVOUR=prod
-if type 'md5sum' > /dev/null 2>&1; then
-        MD5="md5sum --check --status"
+if [ "$(uname)" == "Darwin" ]; then
+	# MacOS download command
+	DLCMD_TOFILE="curl -o"
+	DLCMD_STDOUT="curl"
 else
-        MD5="md5 -r"
+	# Download command for other unices
+	DLCMD_TOFILE="wget -c -O"
+	DLCMD_STDOUT="wget --quiet -O -"
 fi
+
 
 report_error() {
 	echo -------Error---------------------------------
@@ -30,8 +35,8 @@ report_warning() {
     echo ---------------------------------------------
 }
 
-download_and_check() {
-	TAG=$1
+download_and_unzip() {
+	
 	
 	if [ "$(uname)" == "Darwin" ]; then
 		curl -O http://static.abitti.fi/usbimg/${FLAVOUR}/${VERSION}/${TAG}.zip.md5 # Mac OSX
@@ -66,30 +71,49 @@ download_and_check() {
 	rm ${TAG}.zip.md5
 }
 
+download_and_extract() {
+	ZIP_URL=$1
+	ZIP_PATH=$2
+	FILE_INSIDE_ZIP=$3
+	FILE_OUTSIDE_ZIP=$4
+	
+	ZIP_FILE=`basename $ZIP_URL`
+	
+	if [ ! -d $ZIP_PATH ]; then
+		mkdir -p $ZIP_PATH
+	fi
+	
+	if [ -f $ZIP_PATH/$ZIP_FILE ]; then
+		echo "File $ZIP_PATH/$ZIP_FILE already exists"
+	else
+		$DLCMD_TOFILE $ZIP_PATH/$ZIP_FILE $ZIP_URL
+	fi
+	
+	
+	if [ -f $ZIP_PATH/$FILE_OUTSIZE_ZIP ]; then
+		echo "File $ZIP_PATH/$FILENAME_OUTSIDE_ZIP already exists"
+	else
+		BASENAME_INSIDE_ZIP=`basename $FILE_INSIDE_ZIP`
+		unzip $ZIP_PATH/$ZIP_FILE $FILE_INSIDE_ZIP -d $ZIP_PATH
+		mv $ZIP_PATH/$FILE_INSIDE_ZIP $ZIP_PATH/$FILE_OUTSIDE_ZIP
+	fi
+	
+	if [ -d $ZIP_PATH/ytl ]; then
+		rmdir $ZIP_PATH/ytl
+	fi
+}
 
-if [ "$(uname)" == "Darwin" ]; then
-	VERSION=`curl http://static.abitti.fi/usbimg/${FLAVOUR}/latest.txt`
-else
-	VERSION=`wget http://static.abitti.fi/usbimg/${FLAVOUR}/latest.txt -q -O-`
+NEW_VERSION_ABITTI=`${DLCMD_STDOUT} https://static.abitti.fi/etcher-usb/koe-etcher.ver`
+if [ ! -f ${IMAGEPATH}/${NEW_VERSION_ABITTI}/koe.dd ]; then
+	echo "Must download new Abitti (${NEW_VERSION_ABITTI})"
+	download_and_extract https://static.abitti.fi/etcher-usb/koe-etcher.zip ${IMAGEPATH}/${NEW_VERSION_ABITTI} ytl/koe.img koe.dd
 fi
 
-if [ "${VERSION}" = "" ]; then
-	report_error "Could not get latest Abitti version for flavour '${FLAVOUR}'"
+NEW_VERSION_SERVER=`${DLCMD_STDOUT} https://static.abitti.fi/etcher-usb/ktp-etcher.ver`
+if [ ! -f ${IMAGEPATH}/${NEW_VERSION_SERVER}/ktp.dd ]; then
+	echo "Must download new server (${NEW_VERSION_SERVER})"
+	download_and_extract https://static.abitti.fi/etcher-usb/ktp-etcher.zip ${IMAGEPATH}/${NEW_VERSION_SERVER} ytl/ktp.img ktp.dd
 fi
-
-echo "Latest Abitti version: ${VERSION}"
-
-DEST=abitti.v${VERSION}
-
-if [ -d ${DEST} ]; then
-	report_error "Directory ${DEST} already exists"
-fi
-
-mkdir ${DEST}
-cd ${DEST}
-
-download_and_check ktp
-download_and_check koe
 
 # Normal termination
 exit 0
