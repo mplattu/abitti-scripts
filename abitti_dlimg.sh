@@ -20,6 +20,11 @@ else
 	DLCMD_STDOUT="wget --quiet -O -"
 fi
 
+sanitise_versioncode() {
+	INPUT=$1
+	echo -n $INPUT | perl -pe 's/[^\w\d]//g;'
+}
+
 download_and_extract() {
 	ZIP_URL=$1
 	ZIP_PATH=$2
@@ -53,12 +58,16 @@ download_and_extract() {
 }
 
 NEW_VERSION_ABITTI=`${DLCMD_STDOUT} https://static.abitti.fi/etcher-usb/koe-etcher.ver`
+NEW_VERSION_ABITTI=`sanitise_versioncode ${NEW_VERSION_ABITTI}`
+
 if [ ! -f ${IMAGEPATH}/${NEW_VERSION_ABITTI}/koe.dd ]; then
 	echo "Must download new Abitti (${NEW_VERSION_ABITTI})"
 	download_and_extract https://static.abitti.fi/etcher-usb/koe-etcher.zip ${IMAGEPATH}/${NEW_VERSION_ABITTI} ytl/koe.img koe.dd
 fi
 
 NEW_VERSION_SERVER=`${DLCMD_STDOUT} https://static.abitti.fi/etcher-usb/ktp-etcher.ver`
+NEW_VERSION_SERVER=`sanitise_versioncode ${NEW_VERSION_SERVER}`
+
 if [ ! -f ${IMAGEPATH}/${NEW_VERSION_SERVER}/ktp.dd ]; then
 	echo "Must download new server (${NEW_VERSION_SERVER})"
 	download_and_extract https://static.abitti.fi/etcher-usb/ktp-etcher.zip ${IMAGEPATH}/${NEW_VERSION_SERVER} ytl/ktp.img ktp.dd
