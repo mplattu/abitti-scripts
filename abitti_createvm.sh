@@ -28,7 +28,8 @@ if [ ! -d ~/ktp-jako ]; then
     exit 1
 fi
 
-if [ -f *.vdi ]; then
+ls *.vdi 1>/dev/null 2>&1
+if [ $? -eq 0 ]; then
     echo "*.vdi files exist. Delete them and re-run."
     exit 1
 fi
