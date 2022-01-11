@@ -65,6 +65,9 @@ ECHO Attach storage controller to %vmname%
 ECHO Attach disk image to storage controller
 %VBM% storageattach %vmname% --storagectl "SATA" --device 0 --port 0 --type hdd --medium "%CD%\%vmname%.vdi"
 
+rem ECHO Setting independent RTC
+rem %VBM% setextradata %vmname% "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" "1"
+
 ECHO Configuring audio, clipboard and shared folder
 IF %vmname%==Abitti-KOE %VBM% modifyvm %vmname% --audiocontroller hda --audioin off --audioout on
 IF NOT %vmname%==Abitti-KOE %VBM% modifyvm %vmname% --clipboard-mode bidirectional

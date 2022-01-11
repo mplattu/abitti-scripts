@@ -80,6 +80,9 @@ function create_vm() {
 	echo "Attach disk image to storage controller"
 	${VBM} storageattach $vmname --storagectl "SATA" --device 0 --port 0 --type hdd --medium "`pwd`/$vmname.vdi"
 
+#	echo "Setting independent RTC"
+#	${VBM} setextradata $vmname "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" "1"
+
 	if [ "$vmname" = "Abitti-KOE" ]; then
 		echo 'Audio - you may need to change --audio to "oss" or "alsa" instead of "pulse"'
 		${VBM} modifyvm $vmname --audio pulse --audiocontroller hda --audioin off --audioout on
