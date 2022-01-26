@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEV=$1
-FATNAME="exFAT"
+FATNAME="exfat"
 
 if [ "$DEV" = "" ]; then
 	echo "usage: $1 devicename"
