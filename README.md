@@ -44,3 +44,5 @@ the device contains mounted filesystem. Use with caution!
 
 `mkexfat.sh` does the same as above but creates a exFAT filesystem.
 
+`writerandom.sh` writes random data to given device.
+
