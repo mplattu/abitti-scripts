@@ -19,13 +19,6 @@ to do the same. The images are located in `PROFILE/AppData/Local/YtlDigabi/`.
  * `abitti_createvm.sh` Create Abitti VMs on Linux and Mac OSX host. The script must be executed in the directory where the images exist.
  * `abitti_createvm.bat` Create Abitti VMs on Windows host. The script looks disk images from the AbittiUSB location so there is no need to copy images. If the images are not present in profile they are searched from the current directory.
 
-## Create Abitti Server Using a Given Disk Image
-
-`abitti_createsrv.sh` Create Abitti Server using given disk image. You might want to use this
-script to create a server around a backup .vmdk file created with Naksu. If you execute this
-after `abitti_createvm` your server drops to internal VirtualBox `abitti` network with one student
-VM.
-
 ## Run Abitti server in VirtualBox for a local exam network
 
 `abitti_createvm` creates internal network which connects test taker's workstation and the server. Internal here means internal to the VirtualBox. However, it is technically possible to run server as a VirtualBox machine and connect it to your local network. Local here means the local Ethernet (or wireless) network. Before building the setup please make sure that your VirtualBox license allows you to do this.
@@ -48,4 +41,6 @@ Finally, make sure your host does not bind to the Ethernet interface. If your ho
 `mkfat.sh` overwrites existing partition table, creates a FAT32 partition
 and creates a FAT32 filesystem to this partiton. It tries to check whether
 the device contains mounted filesystem. Use with caution!
+
+`mkexfat.sh` does the same as above but creates a exFAT filesystem.
 
