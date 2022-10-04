@@ -5,19 +5,29 @@ www.abitti.fi). The scripts are unofficial and they might be outdated.
 
 ## Download Abitti images
 
- * `abitti_dlimg.sh` Downloads current Abitti images. See variable `FLAVOUR`
-   which you can use to download other than production ("prod") images.
+ * `abitti_dlimg.sh` Downloads current Abitti images to `~/abitti_dlimg.sh`.
 
 ## Create Abitti VMs to VirtualBox
 
 These scripts create Abitti virtual machines to Oracle VirtualBox
-installation. Execute the script in a directory containing server and
-test-taker images (`ktp.dd` and `koe.dd`). Linux and Mac OSX hosts may use
-`abitti_dlimg.sh` to download images. Windows hosts can use official AbittiUSB
-to do the same. The images are located in `PROFILE/AppData/Local/YtlDigabi/`.
+installation. 
+
+**NB! It is technically possible to create virtual machine and connect this
+to the exam network. However, if detected, the consequences can be serious.**
+
+Execute the script in a directory containing server and test-taker images
+(`ktp.dd` and `koe.dd`).
+
+Linux and Mac OSX hosts may use `abitti_dlimg.sh` to download images.
 
  * `abitti_createvm.sh` Create Abitti VMs on Linux and Mac OSX host. The script must be executed in the directory where the images exist.
- * `abitti_createvm.bat` Create Abitti VMs on Windows host. The script looks disk images from the AbittiUSB location so there is no need to copy images. If the images are not present in profile they are searched from the current directory.
+
+Windows hosts can
+ 1. download the current files from download links found at [Abitti.fi](https://www.abitti.fi/fi/paivitykset/).
+ 1. unzip the image packages
+ 1. rename the image files `ytl/ktp.img` -> `ktp.dd`, `ytl/koe.img` -> `koe.dd`
+
+ * `abitti_createvm.bat` Create Abitti VMs on Windows host. The script looks disk images from the ancient AbittiUSB location so there is no need to copy images. If the images are not present in profile they are searched from the current directory.
 
 ## Run Abitti server in VirtualBox for a local exam network
 
@@ -57,5 +67,5 @@ encode media files to the exam:
  * `audio-to-ogg.sh` Encode audio files to OGG Vorbis format.
 
 The webm and ogg formats are free and natively supported by Firefox. The conversions
-are done by (SoX)[https://sourceforge.net/projects/sox/] and (FFmpeg)[https://ffmpeg.org/].
+are done by [SoX](https://sourceforge.net/projects/sox/) and [FFmpeg](https://ffmpeg.org/).
 
