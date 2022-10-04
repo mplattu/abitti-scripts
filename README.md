@@ -46,3 +46,16 @@ the device contains mounted filesystem. Use with caution!
 
 `writerandom.sh` writes random data to given device.
 
+## Audio and video conversions
+
+These audio and video conversion scripts are used by the MEB exam coders to
+encode media files to the exam:
+
+ * `video-to-webm-40-scale-840x472-norm.sh` Resize and encode video to webm and
+   normalize the audio track.
+ * `video-to-webm-40-scale-840x472.sh` Same as above but without normalization.
+ * `audio-to-ogg.sh` Encode audio files to OGG Vorbis format.
+
+The webm and ogg formats are free and natively supported by Firefox. The conversions
+are done by (SoX)[https://sourceforge.net/projects/sox/] and (FFmpeg)[https://ffmpeg.org/].
+
