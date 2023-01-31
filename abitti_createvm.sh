@@ -36,25 +36,14 @@ fi
 
 
 function create_vm() {
-	vmname=$1
+	type=$1
+	vmname=$2
+	disk_size=$3
+	memory_size=$4
+	cores=$5
+	rawimage=$6
 
-	echo "Creating VM $vmname"
-
-	disk_size=16384
-	memory_size=8196
-	rawimage=ktp.dd
-
-	if [ "$vmname" = "Abitti-KOE" ]; then
-		# Default settings for student's VM
-		disk_size=8192
-		memory_size=3500
-		rawimage=koe.dd
-	fi
-
-	if [ ! -f $rawimage ]; then
-		echo "Could not find raw disk image: $rawimage"
-		exit 1
-	fi
+	echo "Creating VM $vmname, type: $type"
 
 	echo "Shutdown $vmname"
 	${VBM} controlvm $vmname poweroff
@@ -72,7 +61,7 @@ function create_vm() {
 	${VBM} createvm --name $vmname --register --ostype Linux_64
 
 	echo "Modify VM $vmname"
-	${VBM} modifyvm $vmname --memory $memory_size --nic1 intnet --intnet1 abitti --usb off --firmware efi --cpus 2 --vram 16
+	${VBM} modifyvm $vmname --memory $memory_size --nic1 intnet --intnet1 abitti --usb off --firmware efi --cpus $cores --vram 16
 
 	echo "Attach storage controller to $vmname"
 	${VBM} storagectl $vmname --name SATA --add sata --controller IntelAHCI --portcount 1
@@ -83,10 +72,12 @@ function create_vm() {
 #	echo "Setting independent RTC"
 #	${VBM} setextradata $vmname "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" "1"
 
-	if [ "$vmname" = "Abitti-KOE" ]; then
+	if [ "$type" = "koe" ]; then
 		echo 'Audio - you may need to change --audio to "oss" or "alsa" instead of "pulse"'
 		${VBM} modifyvm $vmname --audio pulse --audiocontroller hda --audioin off --audioout on
-	else
+	fi
+	
+	if [ "$type" = "ktp" ]; then
 		echo "Shared clipboard"
 		${VBM} modifyvm $vmname --clipboard-mode bidirectional
 
@@ -98,6 +89,10 @@ function create_vm() {
 	${VBM} snapshot $vmname take "Before first boot"
 }
 
-create_vm Abitti-KOE
-create_vm Abitti-KTP1
-create_vm Abitti-KTP2
+create_vm koe Abitti-KOE1 8192 3500 2 koe.dd
+# create_vm koe Abitti-KOE2 8192 3500 2 koe.dd
+# create_vm koe Abitti-KOE3 8192 3500 2 koe.dd
+# create_vm koe Abitti-KOE4 8192 3500 2 koe.dd
+# create_vm koe Abitti-KOE5 8192 3500 2 koe.dd
+create_vm ktp Abitti-KTP1 16384 8196 4 ktp.dd
+create_vm ktp Abitti-KTP2 16384 8196 2 ktp.dd
