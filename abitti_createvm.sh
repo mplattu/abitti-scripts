@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+PWD=`pwd`
+PWD_RESOLVED=`readlink -f $PWD`
+
 if [ "$(uname)" == "Darwin" ]; then
     # Running on Mac OSX
     VBM=/Applications/VirtualBox.app/Contents/Resources/VirtualBoxVM.app/Contents/MacOS/VBoxManage
@@ -52,7 +55,7 @@ function create_vm() {
 	${VBM} unregistervm $vmname --delete
 
 	echo "Convert disk image for $vmname"
-	${VBM} convertfromraw $rawimage $vmname.vdi --format vdi
+	${VBM} convertfromraw $rawimage "$PWD_RESOLVED/$vmname.vdi" --format vdi
 
 	echo "Add more storage space for $vmname.vdi"
 	${VBM} modifyhd $vmname.vdi --resize $disk_size
@@ -67,7 +70,7 @@ function create_vm() {
 	${VBM} storagectl $vmname --name SATA --add sata --controller IntelAHCI --portcount 1
 
 	echo "Attach disk image to storage controller"
-	${VBM} storageattach $vmname --storagectl "SATA" --device 0 --port 0 --type hdd --medium "`pwd`/$vmname.vdi"
+	${VBM} storageattach $vmname --storagectl "SATA" --device 0 --port 0 --type hdd --medium "$PWD_RESOLVED/$vmname.vdi"
 
 #	echo "Setting independent RTC"
 #	${VBM} setextradata $vmname "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" "1"
