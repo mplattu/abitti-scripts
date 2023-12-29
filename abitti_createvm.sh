@@ -31,13 +31,6 @@ if [ ! -d ~/ktp-jako ]; then
     exit 1
 fi
 
-ls *.vdi 1>/dev/null 2>&1
-if [ $? -eq 0 ]; then
-    echo "*.vdi files exist. Delete them and re-run."
-    exit 1
-fi
-
-
 function create_vm() {
 	type=$1
 	vmname=$2
@@ -48,17 +41,24 @@ function create_vm() {
 
 	echo "Creating VM $vmname, type: $type"
 
+	vdifile="$PWD_RESOLVED/$vmname.vdi"
+
 	echo "Shutdown $vmname"
 	${VBM} controlvm $vmname poweroff
 
 	echo "Delete $vmname and related files"
 	${VBM} unregistervm $vmname --delete
 
+	if [ -f "$vdifile" ]; then
+		echo "error: $vdifile exists"
+		exit 1
+	fi
+
 	echo "Convert disk image for $vmname"
-	${VBM} convertfromraw $rawimage "$PWD_RESOLVED/$vmname.vdi" --format vdi
+	${VBM} convertfromraw "$rawimage" "$vdifile" --format vdi
 
 	echo "Add more storage space for $vmname.vdi"
-	${VBM} modifyhd $vmname.vdi --resize $disk_size
+	${VBM} modifyhd "$vdifile" --resize $disk_size
 
 	echo "Create VM $vmname"
 	${VBM} createvm --name $vmname --register --ostype Linux_64
@@ -70,7 +70,7 @@ function create_vm() {
 	${VBM} storagectl $vmname --name SATA --add sata --controller IntelAHCI --portcount 1
 
 	echo "Attach disk image to storage controller"
-	${VBM} storageattach $vmname --storagectl "SATA" --device 0 --port 0 --type hdd --medium "$PWD_RESOLVED/$vmname.vdi"
+	${VBM} storageattach $vmname --storagectl "SATA" --device 0 --port 0 --type hdd --medium "$vdifile"
 
 #	echo "Setting independent RTC"
 #	${VBM} setextradata $vmname "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" "1"
