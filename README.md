@@ -29,6 +29,15 @@ Windows hosts can
 
  * `abitti_createvm.bat` Create Abitti VMs on Windows host. The script looks disk images from the ancient AbittiUSB location so there is no need to copy images. If the images are not present in profile they are searched from the current directory.
 
+## Start Abitti 2 docker container
+
+There is only Linux script for this. Install the required packages according to the MEB Abitti 2 Linux instructions.
+
+ * Copy `a2_createvm.env.sample` to `a2_createvm.env`.
+ * Edit the file to suit your needs.
+ * Go to an empty directory (e.g. `~/a2`). The directory should not contain `certs/` nor `ktp-jako/`.
+ * Execute `a2_createvm.sh`.
+
 ## Revert Abitti USB stick "back to normal"
 
 `mkfat.sh` overwrites existing partition table, creates a FAT32 partition
