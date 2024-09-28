@@ -38,6 +38,9 @@ There is only Linux script for this. Install the required packages according to 
  * Go to an empty directory (e.g. `~/a2`). The directory should not contain `certs/` nor `ktp-jako/`.
  * Execute `a2_createvm.sh`.
 
+See also:
+ * `a2_rmi.sh` to remove all Abitti 2 -related docker images
+
 ## Revert Abitti USB stick "back to normal"
 
 `mkfat.sh` overwrites existing partition table, creates a FAT32 partition
