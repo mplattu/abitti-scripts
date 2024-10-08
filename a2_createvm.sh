@@ -69,7 +69,7 @@ if [ ! -f certs/domain.txt ]; then
 	fi
 
 	echo "Starting query for server address and certificate..."
-	HOST_IP=$HOST_IP API_KEY=$API_KEY sh ./create-certificate.sh
+	HOST_IP=$HOST_IP API_KEY=$API_KEY bash ./create-certificate.sh
 	echo "...finished query for server address and certificate"
 fi
 
