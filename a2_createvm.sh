@@ -101,4 +101,6 @@ zenity --info --text="Starting A2 server ${ABITTI_VERSION} at <a href=\"https://
 
 # Finally - profit!
 
-HOST_NAME=$HOST_NAME docker compose -f ${DOCKERFILE} up --force-recreate --renew-anon-volumes
+COUCHDB_USER=$COUCHDB_USER COUCHDB_PASSWORD=$COUCHDB_PASSWORD \
+	HOST_NAME=$HOST_NAME \
+	docker compose -f ${DOCKERFILE} up --force-recreate --renew-anon-volumes
