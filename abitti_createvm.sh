@@ -41,6 +41,11 @@ function create_vm() {
 
 	echo "Creating VM $vmname, type: $type"
 
+	if [ ! -f "$rawimage" ]; then
+		echo "error: raw image file $rawimage was not found"
+		exit 1
+	fi
+
 	vdifile="$PWD_RESOLVED/$vmname.vdi"
 
 	echo "Shutdown $vmname"
